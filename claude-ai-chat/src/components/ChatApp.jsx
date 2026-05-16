@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import '../styles/ChatApp.css';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
