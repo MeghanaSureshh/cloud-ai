@@ -13,6 +13,26 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const { userOps, chatOps, msgOps, saveMessagePair, db } = require('./database');
+const mongoose = require('mongoose');
+const MongoUser = require('./models/User');
+const MongoMessage = require('./models/Message');
+
+// ── MongoDB connection ──
+let mongoConnected = false;
+const connectMongo = async () => {
+  const uri = process.env.MONGODB_URI;
+  if (!uri || uri.includes('paste_your')) {
+    console.log('⚠️  MongoDB not configured — using SQLite only');
+    return;
+  }
+  try {
+    await mongoose.connect(uri);
+    mongoConnected = true;
+    console.log('✅ MongoDB Atlas connected');
+  } catch (err) {
+    console.error('❌ MongoDB failed:', err.message);
+  }
+};
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -57,12 +77,20 @@ app.post('/api/auth/signup', async (req, res) => {
 
   const emailLower = email.toLowerCase().trim();
   try {
+    // Check SQLite first
     const existing = userOps.findByEmail.get(emailLower);
     if (existing) return res.status(409).json({ error: 'An account with this email already exists.' });
 
     const hashed = await bcrypt.hash(password, 12);
     const id = crypto.randomUUID();
     userOps.create.run(id, name.trim(), emailLower, hashed);
+
+    // Also save to MongoDB if connected
+    if (mongoConnected) {
+      try {
+        await MongoUser.create({ _id: id, name: name.trim(), email: emailLower, password });
+      } catch {}
+    }
 
     console.log(`✅ Registered: ${name}`);
     res.status(201).json({ user: { id, name: name.trim(), email: emailLower } });
@@ -82,6 +110,11 @@ app.post('/api/auth/login', async (req, res) => {
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ error: 'Invalid email or password.' });
+
+    // Update last login in MongoDB
+    if (mongoConnected) {
+      MongoUser.findOneAndUpdate({ email: user.email }, { lastLogin: new Date() }).catch(() => {});
+    }
 
     console.log(`✅ Login: ${user.name}`);
     res.json({ user: { id: user.id, name: user.name, email: user.email } });
@@ -209,6 +242,16 @@ app.post('/api/chat', async (req, res) => {
     }
     // Save to SQLite
     if (userId) saveMessagePair(userId, sessionId, message.trim(), reply, 'text');
+
+    // Save to MongoDB
+    if (mongoConnected && userId) {
+      const chatTitle = message.trim().substring(0, 40);
+      MongoMessage.insertMany([
+        { userId, sessionId, chatTitle, role: 'user', content: message.trim(), type: 'text' },
+        { userId, sessionId, chatTitle, role: 'assistant', content: reply, type: 'text' },
+      ]).catch(() => {});
+    }
+
     res.json({ reply });
   } catch (error) {
     console.error('❌ Chat error:', error.message);
@@ -631,68 +674,65 @@ app.post('/api/transcribe', upload.single('audio'), async (req, res) => {
 // ─────────────────────────────────────────
 // Admin — view all users and chat history (password protected)
 // ─────────────────────────────────────────
-app.get('/api/admin/users', (req, res) => {
+app.get('/api/admin/users', async (req, res) => {
   const { password } = req.query;
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    const users = db.prepare('SELECT id, name, email, created_at FROM users ORDER BY created_at DESC').all();
-    res.json({ users, total: users.length });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/admin/chats', (req, res) => {
-  const { password, userId } = req.query;
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  try {
-    const query = userId
-      ? db.prepare('SELECT c.*, u.name, u.email FROM chats c JOIN users u ON c.user_id = u.id WHERE c.user_id = ? ORDER BY c.updated_at DESC').all(userId)
-      : db.prepare('SELECT c.*, u.name, u.email FROM chats c JOIN users u ON c.user_id = u.id ORDER BY c.updated_at DESC').all();
-    res.json({ chats: query, total: query.length });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/admin/messages', (req, res) => {
-  const { password, sessionId, userId } = req.query;
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  try {
-    let query;
-    if (sessionId) {
-      query = db.prepare('SELECT m.*, u.name, u.email FROM messages m JOIN users u ON m.user_id = u.id WHERE m.session_id = ? ORDER BY m.created_at ASC').all(sessionId);
-    } else if (userId) {
-      query = db.prepare('SELECT m.*, u.name, u.email FROM messages m JOIN users u ON m.user_id = u.id WHERE m.user_id = ? ORDER BY m.created_at DESC').all(userId);
-    } else {
-      query = db.prepare('SELECT m.*, u.name, u.email FROM messages m JOIN users u ON m.user_id = u.id ORDER BY m.created_at DESC LIMIT 200').all();
+    if (mongoConnected) {
+      const users = await MongoUser.find({}, 'name email createdAt lastLogin').sort({ createdAt: -1 });
+      return res.json({ users, total: users.length, source: 'mongodb' });
     }
-    res.json({ messages: query, total: query.length });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    const users = db.prepare('SELECT id, name, email, created_at FROM users ORDER BY created_at DESC').all();
+    res.json({ users, total: users.length, source: 'sqlite' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('/api/admin/stats', (req, res) => {
-  const { password } = req.query;
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+app.get('/api/admin/history', async (req, res) => {
+  const { password, userId, email } = req.query;
+  if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
   try {
+    if (mongoConnected) {
+      let query = {};
+      if (userId) query.userId = userId;
+      if (email) {
+        const user = await MongoUser.findOne({ email });
+        if (user) query.userId = user._id;
+      }
+      const messages = await MongoMessage.find(query)
+        .populate('userId', 'name email')
+        .sort({ createdAt: -1 })
+        .limit(500);
+      return res.json({ messages, total: messages.length, source: 'mongodb' });
+    }
+    // SQLite fallback
+    const messages = db.prepare(`
+      SELECT m.*, u.name, u.email FROM messages m
+      JOIN users u ON m.user_id = u.id
+      ORDER BY m.created_at DESC LIMIT 500
+    `).all();
+    res.json({ messages, total: messages.length, source: 'sqlite' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/stats', async (req, res) => {
+  const { password } = req.query;
+  if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    if (mongoConnected) {
+      const totalUsers    = await MongoUser.countDocuments();
+      const totalMessages = await MongoMessage.countDocuments();
+      const recentUsers   = await MongoUser.find({}, 'name email createdAt').sort({ createdAt: -1 }).limit(10);
+      const userMessages  = await MongoMessage.aggregate([
+        { $group: { _id: '$userId', count: { $sum: 1 } } },
+        { $sort: { count: -1 } }, { $limit: 10 },
+      ]);
+      return res.json({ totalUsers, totalMessages, recentUsers, userMessages, source: 'mongodb' });
+    }
     const totalUsers    = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
-    const totalChats    = db.prepare('SELECT COUNT(*) as count FROM chats').get().count;
     const totalMessages = db.prepare('SELECT COUNT(*) as count FROM messages').get().count;
-    const recentUsers   = db.prepare('SELECT name, email, created_at FROM users ORDER BY created_at DESC LIMIT 5').all();
-    res.json({ totalUsers, totalChats, totalMessages, recentUsers });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    const recentUsers   = db.prepare('SELECT name, email, created_at FROM users ORDER BY created_at DESC LIMIT 10').all();
+    res.json({ totalUsers, totalMessages, recentUsers, source: 'sqlite' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ─────────────────────────────────────────
@@ -972,9 +1012,10 @@ Return JSON in this exact format:
 });
 
 // ─────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  await connectMongo();
   console.log(`\n✅ Backend running at http://localhost:${PORT}`);
-  console.log(`🗄️  Database: SQLite (cloudai.db)`);
+  console.log(`🗄️  SQLite: cloudai.db | MongoDB: ${mongoConnected ? 'connected' : 'not configured'}`);
   console.log(`🔑 API key: ${process.env.GROQ_API_KEY.substring(0, 8)}...`);
   console.log(`📄 PDF:       POST /api/upload/pdf`);
   console.log(`🎨 Image:     POST /api/generate/image`);
