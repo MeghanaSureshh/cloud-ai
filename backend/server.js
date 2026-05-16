@@ -672,8 +672,110 @@ app.post('/api/transcribe', upload.single('audio'), async (req, res) => {
 });
 
 // ─────────────────────────────────────────
-// Admin — view all users and chat history (password protected)
+// Admin Dashboard — HTML page with all data
 // ─────────────────────────────────────────
+app.get('/admin', async (req, res) => {
+  const { password } = req.query;
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.send(`
+      <html><body style="background:#000;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;">
+        <h2>🔐 Admin Login</h2>
+        <form method="GET" action="/admin">
+          <input name="password" type="password" placeholder="Enter admin password"
+            style="padding:10px;border-radius:8px;border:1px solid #7c3aed;background:#111;color:#fff;font-size:16px;width:280px;" />
+          <button type="submit" style="margin-left:10px;padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:16px;">Login</button>
+        </form>
+      </body></html>
+    `);
+  }
+
+  try {
+    let users = [], messages = [], totalUsers = 0, totalMessages = 0;
+
+    if (mongoConnected) {
+      users = await MongoUser.find({}, 'name email createdAt lastLogin').sort({ createdAt: -1 });
+      messages = await MongoMessage.find({}).populate('userId', 'name email').sort({ createdAt: -1 }).limit(200);
+      totalUsers = users.length;
+      totalMessages = messages.length;
+    } else {
+      users = db.prepare('SELECT id, name, email, created_at FROM users ORDER BY created_at DESC').all();
+      messages = db.prepare(`SELECT m.*, u.name as userName, u.email as userEmail FROM messages m JOIN users u ON m.user_id = u.id ORDER BY m.created_at DESC LIMIT 200`).all();
+      totalUsers = users.length;
+      totalMessages = messages.length;
+    }
+
+    const usersHtml = users.map(u => `
+      <tr>
+        <td>${u.name || u.name}</td>
+        <td>${u.email}</td>
+        <td>${new Date(u.createdAt || u.created_at).toLocaleString()}</td>
+        <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString() : 'N/A'}</td>
+      </tr>`).join('');
+
+    const messagesHtml = messages.map(m => `
+      <tr>
+        <td>${m.userId?.name || m.userName || 'Unknown'}</td>
+        <td>${m.userId?.email || m.userEmail || ''}</td>
+        <td><span style="color:${m.role === 'user' ? '#60a5fa' : '#34d399'}">${m.role}</span></td>
+        <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(m.content || '').substring(0, 100)}</td>
+        <td>${new Date(m.createdAt || m.created_at).toLocaleString()}</td>
+      </tr>`).join('');
+
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud AI Admin</title>
+  <meta charset="UTF-8">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#050510; color:#e0e0ff; font-family:'Segoe UI',sans-serif; padding:20px; }
+    h1 { color:#a78bfa; margin-bottom:20px; font-size:28px; }
+    h2 { color:#c4b5fd; margin:30px 0 12px; font-size:18px; }
+    .stats { display:flex; gap:16px; margin-bottom:30px; flex-wrap:wrap; }
+    .stat { background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:12px; padding:20px 30px; text-align:center; }
+    .stat-num { font-size:36px; font-weight:800; color:#a78bfa; }
+    .stat-label { font-size:13px; color:rgba(255,255,255,0.5); margin-top:4px; }
+    table { width:100%; border-collapse:collapse; background:rgba(255,255,255,0.03); border-radius:12px; overflow:hidden; }
+    th { background:rgba(124,58,237,0.3); padding:12px 16px; text-align:left; font-size:13px; color:#c4b5fd; }
+    td { padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:rgba(255,255,255,0.8); }
+    tr:hover td { background:rgba(124,58,237,0.08); }
+    .badge { background:rgba(124,58,237,0.2); border-radius:20px; padding:2px 10px; font-size:11px; }
+    .db-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; margin-bottom:20px;
+      background:${mongoConnected ? 'rgba(52,211,153,0.2)' : 'rgba(239,68,68,0.2)'};
+      color:${mongoConnected ? '#34d399' : '#fca5a5'};
+      border:1px solid ${mongoConnected ? 'rgba(52,211,153,0.4)' : 'rgba(239,68,68,0.4)'}; }
+  </style>
+</head>
+<body>
+  <h1>☁️ Cloud AI Admin Dashboard</h1>
+  <div class="db-badge">${mongoConnected ? '🟢 MongoDB Atlas Connected' : '🔴 SQLite Only'}</div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">${totalUsers}</div><div class="stat-label">Total Users</div></div>
+    <div class="stat"><div class="stat-num">${totalMessages}</div><div class="stat-label">Total Messages</div></div>
+    <div class="stat"><div class="stat-num">${messages.filter(m => m.role === 'user').length}</div><div class="stat-label">User Messages</div></div>
+    <div class="stat"><div class="stat-num">${messages.filter(m => m.role === 'assistant').length}</div><div class="stat-label">AI Replies</div></div>
+  </div>
+
+  <h2>👥 Users (${totalUsers})</h2>
+  <table>
+    <tr><th>Name</th><th>Email</th><th>Signed Up</th><th>Last Login</th></tr>
+    ${usersHtml || '<tr><td colspan="4" style="text-align:center;color:rgba(255,255,255,0.3)">No users yet</td></tr>'}
+  </table>
+
+  <h2>💬 Chat History (latest ${messages.length})</h2>
+  <table>
+    <tr><th>User</th><th>Email</th><th>Role</th><th>Message</th><th>Time</th></tr>
+    ${messagesHtml || '<tr><td colspan="5" style="text-align:center;color:rgba(255,255,255,0.3)">No messages yet</td></tr>'}
+  </table>
+
+  <p style="margin-top:30px;color:rgba(255,255,255,0.2);font-size:12px;">Generated at ${new Date().toLocaleString()} · Cloud AI by Meghana</p>
+</body>
+</html>`);
+  } catch (err) {
+    res.status(500).send(`<pre>Error: ${err.message}</pre>`);
+  }
+});
 app.get('/api/admin/users', async (req, res) => {
   const { password } = req.query;
   if (password !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
