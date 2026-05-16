@@ -1,4 +1,3 @@
-import API_URL from '../config.js';
 import React, { useState } from 'react';
 import '../styles/ProjectCreator.css';
 import { generateProjectPdf } from '../utils/generateProjectPdf';
@@ -92,8 +91,6 @@ const STACKS_BY_TYPE = {
 };
 
 const DEFAULT_STACK = ['HTML + CSS + JS', 'React + CSS', 'Node.js + Express', 'MERN Stack', 'Python + Django'];
-
-const STEPS = ['Name', 'Category', 'Type', 'Stack', 'Details', 'Generate'];
 
 const ProjectCreator = ({ onClose }) => {
   const [step, setStep] = useState(0); // 0=name,1=category,2=type,3=stack,4=details,5=generating,6=result

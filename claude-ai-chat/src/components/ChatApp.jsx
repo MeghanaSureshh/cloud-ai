@@ -1,5 +1,4 @@
-import API_URL from '../config.js';
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import '../styles/ChatApp.css';
 import MessageList from './MessageList';
 import InputArea from './InputArea';

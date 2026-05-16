@@ -1,4 +1,3 @@
-import API_URL from '../config.js';
 import { jsPDF } from 'jspdf';
 
 const safe = (v, fb = '') => (v != null ? String(v) : fb);

@@ -1,4 +1,3 @@
-import API_URL from '../config.js';
 import { jsPDF } from 'jspdf';
 
 export const generateProjectPdf = async (projectId, projectName, projectData) => {

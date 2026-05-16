@@ -1,4 +1,3 @@
-import API_URL from '../config.js';
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/InputArea.css';
 import { convertToWav } from '../utils/audioUtils';

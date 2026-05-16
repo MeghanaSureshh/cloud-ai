@@ -1,4 +1,3 @@
-import API_URL from '../config.js';
 import React, { useState } from 'react';
 import '../styles/Message.css';
 

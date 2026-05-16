@@ -47,7 +47,7 @@ const CameraCapture = ({ onCapture, onClose }) => {
   useEffect(() => {
     startCamera();
     return () => { streamRef.current?.getTracks().forEach(t => t.stop()); };
-  }, []);
+  }, [startCamera]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCapture = () => {
     const video = videoRef.current;

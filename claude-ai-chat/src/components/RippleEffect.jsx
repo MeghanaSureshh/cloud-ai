@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 // Adds a ripple burst wherever the user clicks
 const RippleEffect = () => {
