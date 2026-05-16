@@ -4,7 +4,7 @@ export const generateProjectPdf = async (projectId, projectName, projectData) =>
   // Try to get AI-generated docs, fall back to basic info if unavailable
   let docs = null;
   try {
-    const res = await fetch(`http://localhost:5000/api/project/docs/${projectId}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/project/docs/${projectId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     });
