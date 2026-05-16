@@ -1,0 +1,116 @@
+.audio-player {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(124,58,237,0.08);
+  border: 1px solid rgba(124,58,237,0.2);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  min-width: 220px;
+  max-width: 100%;
+}
+
+.audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Buttons */
+.audio-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  padding: 5px;
+}
+
+.audio-btn svg { width: 100%; height: 100%; }
+
+.play-btn {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: white;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.35);
+}
+
+.play-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 14px rgba(124,58,237,0.5);
+}
+
+.play-btn.loading { opacity: 0.7; cursor: wait; }
+
+.pause-btn {
+  background: rgba(124,58,237,0.3);
+  color: #c4b5fd;
+}
+
+.pause-btn:hover { background: rgba(124,58,237,0.5); color: white; }
+
+.stop-btn {
+  background: rgba(239,68,68,0.15);
+  color: #fca5a5;
+}
+
+.stop-btn:hover { background: rgba(239,68,68,0.3); color: white; }
+
+.download-btn {
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.4);
+  margin-left: auto;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.9);
+}
+
+.download-btn:disabled { opacity: 0.4; cursor: wait; }
+
+/* Progress */
+.audio-progress-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.audio-progress-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.audio-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #60a5fa);
+  border-radius: 2px;
+}
+
+.audio-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 500;
+}
+
+/* Spinner */
+.audio-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: audioSpin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes audioSpin { to { transform: rotate(360deg); } }

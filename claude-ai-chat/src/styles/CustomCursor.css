@@ -1,0 +1,3 @@
+*, *::before, *::after { /* default cursor restored */ }
+
+.cur-dot, .cur-ring { display: none; }

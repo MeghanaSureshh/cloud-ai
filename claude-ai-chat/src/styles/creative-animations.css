@@ -1,0 +1,330 @@
+/* ══════════════════════════════════════════
+   CLOUD AI — Creative Animations v2
+══════════════════════════════════════════ */
+
+/* ── Click ripple ── */
+.click-ripple {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(167,139,250,0.6);
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  z-index: 99990;
+  animation: rippleOut 0.7s cubic-bezier(0,0.5,0.5,1) forwards;
+}
+@keyframes rippleOut {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.8; }
+  100% { transform: translate(-50%,-50%) scale(18); opacity: 0; }
+}
+
+/* ── Click burst particles ── */
+.click-particle {
+  position: fixed;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #c4b5fd, #7c3aed);
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: 99990;
+  animation: particleBurst 0.6s ease-out forwards;
+}
+@keyframes particleBurst {
+  0%   { transform: translate(-50%,-50%) rotate(var(--angle)) translateX(0) scale(1); opacity: 1; }
+  100% { transform: translate(-50%,-50%) rotate(var(--angle)) translateX(var(--dist)) scale(0); opacity: 0; }
+}
+
+/* ── Animated gradient border on input focus ── */
+.input-wrapper:focus-within {
+  border-color: transparent !important;
+  background: rgba(255,255,255,0.07) !important;
+  position: relative;
+}
+.input-wrapper:focus-within::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 17px;
+  padding: 1px;
+  background: linear-gradient(90deg, #7c3aed, #60a5fa, #34d399, #a78bfa, #7c3aed);
+  background-size: 300% 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderFlow 3s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes borderFlow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ── Glowing send button ── */
+.send-btn {
+  position: relative;
+  overflow: hidden;
+}
+.send-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: inherit;
+}
+.send-btn:hover:not(:disabled)::before { opacity: 1; }
+
+/* ── Message bubble shimmer on hover ── */
+.message-content {
+  position: relative;
+  overflow: hidden;
+}
+.user-message .message-content::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  transform: skewX(-20deg);
+  transition: none;
+}
+.user-message .message-content:hover::after {
+  animation: msgShimmer 0.6s ease forwards;
+}
+@keyframes msgShimmer {
+  0%   { left: -100%; }
+  100% { left: 150%; }
+}
+
+/* ── Sidebar logo rainbow glow ── */
+.logo-name {
+  background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399, #a78bfa);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbowText 4s linear infinite;
+}
+@keyframes rainbowText {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ── Header brand name gradient ── */
+.header-info h1 {
+  background: linear-gradient(90deg, #ffffff, #e9d5ff, #ffffff);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: rainbowText 5s linear infinite;
+}
+
+/* ── New chat button animated border ── */
+.new-chat-btn {
+  position: relative;
+  z-index: 0;
+}
+.new-chat-btn::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 13px;
+  background: linear-gradient(90deg, #7c3aed, #60a5fa, #34d399, #7c3aed);
+  background-size: 300% 100%;
+  animation: borderFlow 3s linear infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.new-chat-btn:hover::before { opacity: 1; }
+
+/* ── Floating orbs in chat area ── */
+.chat-area::after {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,58,237,0.04), transparent 70%);
+  bottom: 10%;
+  right: 5%;
+  animation: orbFloat2 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  33%       { transform: translate(-20px,-30px) scale(1.1); }
+  66%       { transform: translate(15px,-15px) scale(0.9); }
+}
+
+/* ── Typing wrapper pulse ── */
+.typing-bubble {
+  animation: bubblePulse 2s ease-in-out infinite;
+}
+@keyframes bubblePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+  50%       { box-shadow: 0 0 0 4px rgba(124,58,237,0.1); }
+}
+
+/* ── Bot avatar spin on message ── */
+.bot-message .message-avatar {
+  animation: avatarPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes avatarPop {
+  0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ── User avatar pop ── */
+.message-avatar.user {
+  animation: avatarPopRight 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes avatarPopRight {
+  0%   { transform: scale(0) rotate(180deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ── Sidebar item stagger — removed to prevent blink on typing ── */
+
+/* ── Auth input focus glow ── */
+.input-wrap input:focus {
+  animation: inputGlow 0.3s ease forwards;
+}
+@keyframes inputGlow {
+  from { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+  to   { box-shadow: 0 0 0 3px rgba(124,58,237,0.15), 0 0 20px rgba(124,58,237,0.08); }
+}
+
+/* ── Auth button shine ── */
+.auth-btn {
+  position: relative;
+  overflow: hidden;
+}
+.auth-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: skewX(-20deg);
+  animation: btnShine 3s ease-in-out infinite;
+}
+@keyframes btnShine {
+  0%, 70%, 100% { left: -60%; }
+  40%            { left: 120%; }
+}
+
+/* ── Project type card glow on select ── */
+.option-card.selected {
+  animation: cardGlow 0.4s ease forwards;
+}
+@keyframes cardGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+  50%  { box-shadow: 0 0 20px rgba(124,58,237,0.4); }
+  100% { box-shadow: 0 0 0 1px rgba(124,58,237,0.2); }
+}
+
+/* ── Generate button pulse ── */
+.wizard-generate-btn {
+  animation: generatePulse 2s ease-in-out infinite;
+}
+@keyframes generatePulse {
+  0%, 100% { box-shadow: 0 2px 12px rgba(5,150,105,0.35); }
+  50%       { box-shadow: 0 4px 24px rgba(5,150,105,0.6), 0 0 40px rgba(5,150,105,0.2); }
+}
+
+/* ── Search result hover ── */
+.search-link-item {
+  position: relative;
+  overflow: hidden;
+}
+.search-link-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  width: 3px;
+  height: 0%;
+  background: linear-gradient(to bottom, #7c3aed, #60a5fa);
+  transition: height 0.25s ease;
+  border-radius: 2px;
+}
+.search-link-item:hover::before { height: 100%; }
+
+/* ── PDF card hover ── */
+.pdf-card {
+  transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pdf-card:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 8px 24px rgba(239,68,68,0.15);
+}
+
+/* ── Image card reveal with blur ── */
+.image-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.image-card:hover {
+  transform: scale(1.01) translateY(-2px);
+  box-shadow: 0 12px 32px rgba(124,58,237,0.2);
+}
+
+/* ── Stat item count-up feel ── */
+.stat-num {
+  animation: statPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes statPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── Deploy success bounce ── */
+.deploy-success {
+  animation: successBounce 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes successBounce {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── Camera modal entrance ── */
+.camera-modal {
+  animation: cameraIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes cameraIn {
+  from { transform: scale(0.85) translateY(20px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ── Capture button heartbeat ── */
+.capture-btn {
+  animation: heartbeat 2s ease-in-out infinite;
+}
+@keyframes heartbeat {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
+}
+
+/* ── Scrollbar animated ── */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgba(124,58,237,0.3), rgba(96,165,250,0.3));
+  transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, rgba(124,58,237,0.6), rgba(96,165,250,0.6));
+}
+
+/* ── Reduce motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
