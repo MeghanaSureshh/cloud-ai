@@ -78,7 +78,7 @@ const Login = () => {
           <div className="form-group">
             <label>Email address</label>
             <div className="input-wrap">
-              <span className="input-icon">✉️</span>
+              <span className="input-icon"></span>
               <input type="email" placeholder="you@example.com" value={email}
                 onChange={e => setEmail(e.target.value)} disabled={loading} autoComplete="email" />
             </div>
@@ -90,7 +90,7 @@ const Login = () => {
               <Link to="/signup" className="forgot-link">Forgot password?</Link>
             </label>
             <div className="input-wrap">
-              <span className="input-icon">🔒</span>
+              <span className="input-icon"></span>
               <input type={showPassword ? 'text' : 'password'} placeholder="Enter your password"
                 value={password} onChange={e => setPassword(e.target.value)}
                 disabled={loading} autoComplete="current-password" />

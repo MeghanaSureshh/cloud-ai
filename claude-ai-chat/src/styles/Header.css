@@ -1,8 +1,8 @@
 .chat-header {
   display: flex; justify-content: space-between; align-items: center;
   padding: 12px 20px;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(0px);
   border-bottom: 1px solid rgba(124,58,237,0.15);
   flex-shrink: 0;
   position: relative;
@@ -75,16 +75,7 @@
   font-size: 11px; color: rgba(255,255,255,0.4);
   margin: 2px 0 0; display: flex; align-items: center; gap: 6px;
 }
-.status-dot {
-  width: 7px; height: 7px; background: #34d399;
-  border-radius: 50%; flex-shrink: 0;
-  box-shadow: 0 0 8px #34d399;
-  animation: statusGlow 2s ease-in-out infinite;
-}
-@keyframes statusGlow {
-  0%,100% { box-shadow: 0 0 4px #34d399; transform: scale(1); }
-  50%      { box-shadow: 0 0 14px #34d399, 0 0 24px rgba(52,211,153,0.4); transform: scale(1.2); }
-}
+.status-dot { display: none; }
 
 .header-actions { display: flex; align-items: center; gap: 8px; }
 

@@ -1,7 +1,7 @@
 .input-container {
   padding: 10px 16px 14px;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(0px);
   border-top: 1px solid rgba(124,58,237,0.15);
   flex-shrink: 0;
 }
