@@ -21,14 +21,14 @@ const ParticleBackground = () => {
 
     // ── Config matching your particles.js config exactly ──
     const CONFIG = {
-      number:      80,
+      number:      150,
       color:       '#ffffff',
-      opacity:     0.5,
-      size:        3,        // max size (random 1–3)
-      lineDistance: 150,
-      lineOpacity:  0.4,
+      opacity:     0.7,
+      size:        3,
+      lineDistance: 130,
+      lineOpacity:  0.5,
       lineWidth:    1,
-      speed:        2,       // slightly reduced for smoothness
+      speed:        3.5,
       repulseDistance: 200,
       repulseDuration: 0.4,
     };
