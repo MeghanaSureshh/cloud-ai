@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import TypeWriter from './TypeWriter';
 import '../styles/Auth.css';
 
 const CloudLogo = () => (
@@ -16,8 +17,7 @@ const CloudLogo = () => (
       </radialGradient>
     </defs>
     <circle cx="40" cy="40" r="38" fill="url(#lgGlow)"/>
-    <path d="M58 52H24a14 14 0 01-2.5-27.75A18 18 0 0156 34h2a10 10 0 010 20z"
-      fill="url(#lgGrad)" opacity="0.95"/>
+    <path d="M58 52H24a14 14 0 01-2.5-27.75A18 18 0 0156 34h2a10 10 0 010 20z" fill="url(#lgGrad)" opacity="0.95"/>
     <path d="M43 22l-9 14h9l-5 14 14-19h-9l7-9z" fill="white" opacity="0.95"/>
   </svg>
 );
@@ -34,10 +34,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!email.trim() || !password.trim()) {
-      setError('Please fill in all fields.');
-      return;
-    }
+    if (!email.trim() || !password.trim()) { setError('Please fill in all fields.'); return; }
     setLoading(true);
     try {
       await login(email.trim(), password);
@@ -51,13 +48,11 @@ const Login = () => {
 
   return (
     <div className="auth-page">
-      {/* Animated background orbs */}
       <div className="auth-orb orb-1" />
       <div className="auth-orb orb-2" />
       <div className="auth-orb orb-3" />
 
       <div className="auth-card">
-        {/* Logo */}
         <div className="auth-logo-wrap">
           <CloudLogo />
           <div className="auth-brand">
@@ -67,29 +62,25 @@ const Login = () => {
         </div>
 
         <div className="auth-header">
-          <h2>Welcome back</h2>
-          <p>Sign in to continue your conversations</p>
+          <h2 className="auth-typewriter-heading">
+            <TypeWriter
+              texts={['WELCOME BACK!', 'GOOD TO SEE YOU!', 'SIGN IN TO CONTINUE!', 'HELLO AGAIN!']}
+              speed={70}
+              pause={2000}
+            />
+          </h2>
+          <p className="auth-sub-animated">Your AI assistant is waiting for you ✨</p>
         </div>
 
-        {error && (
-          <div className="auth-error">
-            <span>⚠️</span> {error}
-          </div>
-        )}
+        {error && <div className="auth-error"><span>⚠️</span> {error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label>Email address</label>
             <div className="input-wrap">
               <span className="input-icon">✉️</span>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                disabled={loading}
-                autoComplete="email"
-              />
+              <input type="email" placeholder="you@example.com" value={email}
+                onChange={e => setEmail(e.target.value)} disabled={loading} autoComplete="email" />
             </div>
           </div>
 
@@ -100,36 +91,22 @@ const Login = () => {
             </label>
             <div className="input-wrap">
               <span className="input-icon">🔒</span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                disabled={loading}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(s => !s)}
-                tabIndex={-1}
-              >
+              <input type={showPassword ? 'text' : 'password'} placeholder="Enter your password"
+                value={password} onChange={e => setPassword(e.target.value)}
+                disabled={loading} autoComplete="current-password" />
+              <button type="button" className="toggle-password"
+                onClick={() => setShowPassword(s => !s)} tabIndex={-1}>
                 {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
           </div>
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? (
-              <span className="btn-spinner" />
-            ) : (
-              <>Sign In <span className="btn-arrow">→</span></>
-            )}
+            {loading ? <span className="btn-spinner" /> : <>Sign In <span className="btn-arrow">→</span></>}
           </button>
         </form>
 
         <div className="auth-divider"><span>or</span></div>
-
         <div className="auth-footer">
           Don't have an account?{' '}
           <Link to="/signup" className="auth-link">Create one free</Link>

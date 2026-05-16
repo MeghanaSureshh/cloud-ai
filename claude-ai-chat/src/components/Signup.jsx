@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import TypeWriter from './TypeWriter';
 import '../styles/Auth.css';
 
 const CloudLogo = () => (
@@ -16,8 +17,7 @@ const CloudLogo = () => (
       </radialGradient>
     </defs>
     <circle cx="40" cy="40" r="38" fill="url(#sgGlow)"/>
-    <path d="M58 52H24a14 14 0 01-2.5-27.75A18 18 0 0156 34h2a10 10 0 010 20z"
-      fill="url(#sgGrad)" opacity="0.95"/>
+    <path d="M58 52H24a14 14 0 01-2.5-27.75A18 18 0 0156 34h2a10 10 0 010 20z" fill="url(#sgGrad)" opacity="0.95"/>
     <path d="M43 22l-9 14h9l-5 14 14-19h-9l7-9z" fill="white" opacity="0.95"/>
   </svg>
 );
@@ -39,7 +39,8 @@ const PasswordStrength = ({ password }) => {
     <div className="password-strength">
       <div className="strength-bars">
         {[1,2,3,4].map(i => (
-          <div key={i} className="strength-bar" style={{ background: i <= score ? colors[score] : 'rgba(255,255,255,0.1)' }} />
+          <div key={i} className="strength-bar"
+            style={{ background: i <= score ? colors[score] : 'rgba(255,255,255,0.1)' }} />
         ))}
       </div>
       <span style={{ color: colors[score] }}>{labels[score]}</span>
@@ -61,18 +62,9 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!name.trim() || !email.trim() || !password || !confirm) {
-      setError('Please fill in all fields.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-    if (password !== confirm) {
-      setError('Passwords do not match.');
-      return;
-    }
+    if (!name.trim() || !email.trim() || !password || !confirm) { setError('Please fill in all fields.'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (password !== confirm) { setError('Passwords do not match.'); return; }
     setLoading(true);
     try {
       await signup(name.trim(), email.trim(), password);
@@ -100,29 +92,25 @@ const Signup = () => {
         </div>
 
         <div className="auth-header">
-          <h2>Create your account</h2>
-          <p>Start chatting with Cloud AI for free</p>
+          <h2 className="auth-typewriter-heading">
+            <TypeWriter
+              texts={['JOIN CLOUD AI!', 'CREATE YOUR ACCOUNT!', 'GET STARTED FREE!', 'START CHATTING!']}
+              speed={70}
+              pause={2000}
+            />
+          </h2>
+          <p className="auth-sub-animated">Your intelligent AI assistant awaits 🚀</p>
         </div>
 
-        {error && (
-          <div className="auth-error">
-            <span>⚠️</span> {error}
-          </div>
-        )}
+        {error && <div className="auth-error"><span>⚠️</span> {error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label>Full name</label>
             <div className="input-wrap">
               <span className="input-icon">👤</span>
-              <input
-                type="text"
-                placeholder="Your name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                disabled={loading}
-                autoComplete="name"
-              />
+              <input type="text" placeholder="Your name" value={name}
+                onChange={e => setName(e.target.value)} disabled={loading} autoComplete="name" />
             </div>
           </div>
 
@@ -130,14 +118,8 @@ const Signup = () => {
             <label>Email address</label>
             <div className="input-wrap">
               <span className="input-icon">✉️</span>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                disabled={loading}
-                autoComplete="email"
-              />
+              <input type="email" placeholder="you@example.com" value={email}
+                onChange={e => setEmail(e.target.value)} disabled={loading} autoComplete="email" />
             </div>
           </div>
 
@@ -145,20 +127,11 @@ const Signup = () => {
             <label>Password</label>
             <div className="input-wrap">
               <span className="input-icon">🔒</span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Min. 6 characters"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                disabled={loading}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(s => !s)}
-                tabIndex={-1}
-              >
+              <input type={showPassword ? 'text' : 'password'} placeholder="Min. 6 characters"
+                value={password} onChange={e => setPassword(e.target.value)}
+                disabled={loading} autoComplete="new-password" />
+              <button type="button" className="toggle-password"
+                onClick={() => setShowPassword(s => !s)} tabIndex={-1}>
                 {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
@@ -169,33 +142,19 @@ const Signup = () => {
             <label>Confirm password</label>
             <div className="input-wrap">
               <span className="input-icon">🔒</span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Re-enter your password"
-                value={confirm}
-                onChange={e => setConfirm(e.target.value)}
-                disabled={loading}
-                autoComplete="new-password"
-              />
-              {confirm && (
-                <span className="confirm-check">
-                  {confirm === password ? '✅' : '❌'}
-                </span>
-              )}
+              <input type={showPassword ? 'text' : 'password'} placeholder="Re-enter your password"
+                value={confirm} onChange={e => setConfirm(e.target.value)}
+                disabled={loading} autoComplete="new-password" />
+              {confirm && <span className="confirm-check">{confirm === password ? '✅' : '❌'}</span>}
             </div>
           </div>
 
           <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? (
-              <span className="btn-spinner" />
-            ) : (
-              <>Create Account <span className="btn-arrow">→</span></>
-            )}
+            {loading ? <span className="btn-spinner" /> : <>Create Account <span className="btn-arrow">→</span></>}
           </button>
         </form>
 
         <div className="auth-divider"><span>or</span></div>
-
         <div className="auth-footer">
           Already have an account?{' '}
           <Link to="/login" className="auth-link">Sign in</Link>

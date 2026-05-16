@@ -390,3 +390,84 @@
   .auth-brand-name { font-size: 20px; }
   .auth-header h2 { font-size: 18px; }
 }
+
+/* ── Typewriter heading ── */
+.auth-typewriter-heading {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px;
+  letter-spacing: 1px;
+  min-height: 36px;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  color: #a78bfa;
+  font-weight: 300;
+  animation: cursorBlink 0.8s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Animated subtitle ── */
+.auth-sub-animated {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+  animation: fadeSlideUp 0.8s ease-out both;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Card entrance ── */
+.auth-card {
+  animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(32px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Logo pulse ── */
+.auth-logo-svg {
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%,100% { filter: drop-shadow(0 0 12px rgba(167,139,250,0.5)); transform: scale(1); }
+  50%      { filter: drop-shadow(0 0 24px rgba(167,139,250,0.9)); transform: scale(1.05); }
+}
+
+/* ── Form group stagger ── */
+.auth-form .form-group:nth-child(1) { animation: fadeSlideUp 0.5s 0.1s ease-out both; }
+.auth-form .form-group:nth-child(2) { animation: fadeSlideUp 0.5s 0.2s ease-out both; }
+.auth-form .form-group:nth-child(3) { animation: fadeSlideUp 0.5s 0.3s ease-out both; }
+.auth-form .form-group:nth-child(4) { animation: fadeSlideUp 0.5s 0.4s ease-out both; }
+
+/* ── Button shine ── */
+.auth-btn {
+  position: relative;
+  overflow: hidden;
+}
+.auth-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -60%;
+  width: 40%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: skewX(-20deg);
+  animation: btnShine 3s ease-in-out infinite;
+}
+@keyframes btnShine {
+  0%,70%,100% { left: -60%; }
+  40%          { left: 120%; }
+}
