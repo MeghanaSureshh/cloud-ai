@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import API_URL from '../config';
 import '../styles/ChatApp.css';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
@@ -99,7 +100,7 @@ const ChatApp = () => {
     }));
 
     try {
-      const res = await fetch('http://localhost:5000/api/chat', {
+      const res = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userInput, sessionId: activeChat.sessionId, userId }),
@@ -148,7 +149,7 @@ const ChatApp = () => {
     formData.append('question', question || 'Please summarize this document and highlight the key points.');
 
     try {
-      const res = await fetch('http://localhost:5000/api/upload/pdf', {
+      const res = await fetch(`${API_URL}/api/upload/pdf`, {
         method: 'POST',
         body: formData,
       });
@@ -188,7 +189,7 @@ const ChatApp = () => {
     }));
 
     try {
-      const res = await fetch('http://localhost:5000/api/generate/image', {
+      const res = await fetch(`${API_URL}/api/generate/image`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, sessionId: activeChat.sessionId }),
@@ -227,7 +228,7 @@ const ChatApp = () => {
       return { ...c, title: isFirst ? `Search: ${query.substring(0, 22)}` : c.title };
     }));
     try {
-      const res = await fetch('http://localhost:5000/api/search', {
+      const res = await fetch(`${API_URL}/api/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, sessionId: activeChat.sessionId }),
@@ -274,7 +275,7 @@ const ChatApp = () => {
     }));
 
     try {
-      const res = await fetch('http://localhost:5000/api/vision', {
+      const res = await fetch(`${API_URL}/api/vision`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,7 +338,7 @@ const ChatApp = () => {
 
   const handleClearChat = async () => {
     try {
-      await fetch('http://localhost:5000/api/chat/clear', {
+      await fetch(`${API_URL}/api/chat/clear`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: activeChat.sessionId, userId }),
