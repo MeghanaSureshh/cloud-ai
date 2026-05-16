@@ -12,7 +12,7 @@ const axios = require('axios');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
-const { userOps, chatOps, msgOps, saveMessagePair } = require('./database');
+const { userOps, chatOps, msgOps, saveMessagePair, db } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -625,6 +625,73 @@ app.post('/api/transcribe', upload.single('audio'), async (req, res) => {
     res.status(500).json({ error: 'Failed to transcribe audio. Please try again.' });
   } finally {
     if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+  }
+});
+
+// ─────────────────────────────────────────
+// Admin — view all users and chat history (password protected)
+// ─────────────────────────────────────────
+app.get('/api/admin/users', (req, res) => {
+  const { password } = req.query;
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const users = db.prepare('SELECT id, name, email, created_at FROM users ORDER BY created_at DESC').all();
+    res.json({ users, total: users.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/admin/chats', (req, res) => {
+  const { password, userId } = req.query;
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const query = userId
+      ? db.prepare('SELECT c.*, u.name, u.email FROM chats c JOIN users u ON c.user_id = u.id WHERE c.user_id = ? ORDER BY c.updated_at DESC').all(userId)
+      : db.prepare('SELECT c.*, u.name, u.email FROM chats c JOIN users u ON c.user_id = u.id ORDER BY c.updated_at DESC').all();
+    res.json({ chats: query, total: query.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/admin/messages', (req, res) => {
+  const { password, sessionId, userId } = req.query;
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    let query;
+    if (sessionId) {
+      query = db.prepare('SELECT m.*, u.name, u.email FROM messages m JOIN users u ON m.user_id = u.id WHERE m.session_id = ? ORDER BY m.created_at ASC').all(sessionId);
+    } else if (userId) {
+      query = db.prepare('SELECT m.*, u.name, u.email FROM messages m JOIN users u ON m.user_id = u.id WHERE m.user_id = ? ORDER BY m.created_at DESC').all(userId);
+    } else {
+      query = db.prepare('SELECT m.*, u.name, u.email FROM messages m JOIN users u ON m.user_id = u.id ORDER BY m.created_at DESC LIMIT 200').all();
+    }
+    res.json({ messages: query, total: query.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/admin/stats', (req, res) => {
+  const { password } = req.query;
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    const totalUsers    = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
+    const totalChats    = db.prepare('SELECT COUNT(*) as count FROM chats').get().count;
+    const totalMessages = db.prepare('SELECT COUNT(*) as count FROM messages').get().count;
+    const recentUsers   = db.prepare('SELECT name, email, created_at FROM users ORDER BY created_at DESC LIMIT 5').all();
+    res.json({ totalUsers, totalChats, totalMessages, recentUsers });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
