@@ -25,7 +25,13 @@ if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === 'paste_your_new_gr
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://cloud-ai-xi.vercel.app',
+    'https://cloud-ai-git-main-c-s-meghanas-projects.vercel.app',
+    /\.vercel\.app$/,
+  ],
   methods: ['GET', 'POST', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type'],
 }));
