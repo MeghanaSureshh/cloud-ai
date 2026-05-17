@@ -117,7 +117,7 @@ const Signup = () => {
           <div className="form-group">
             <label>Email address</label>
             <div className="input-wrap">
-              <span className="input-icon">✉️</span>
+              <span className="input-icon"></span>
               <input type="email" placeholder="you@example.com" value={email}
                 onChange={e => setEmail(e.target.value)} disabled={loading} autoComplete="email" />
             </div>
@@ -126,7 +126,7 @@ const Signup = () => {
           <div className="form-group">
             <label>Password</label>
             <div className="input-wrap">
-              <span className="input-icon">🔒</span>
+              <span className="input-icon"></span>
               <input type={showPassword ? 'text' : 'password'} placeholder="Min. 6 characters"
                 value={password} onChange={e => setPassword(e.target.value)}
                 disabled={loading} autoComplete="new-password" />
@@ -141,7 +141,7 @@ const Signup = () => {
           <div className="form-group">
             <label>Confirm password</label>
             <div className="input-wrap">
-              <span className="input-icon">🔒</span>
+              <span className="input-icon"></span>
               <input type={showPassword ? 'text' : 'password'} placeholder="Re-enter your password"
                 value={confirm} onChange={e => setConfirm(e.target.value)}
                 disabled={loading} autoComplete="new-password" />

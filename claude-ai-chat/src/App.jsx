@@ -5,7 +5,6 @@ import ChatApp from './components/ChatApp';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import CustomCursor from './components/CustomCursor';
-import ParticleBackground from './components/ParticleBackground';
 import RippleEffect from './components/RippleEffect';
 import './App.css';
 import './styles/animations.css';
@@ -43,7 +42,6 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <ParticleBackground />
         <CustomCursor />
         <RippleEffect />
         <AppRoutes />

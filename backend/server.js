@@ -341,7 +341,7 @@ app.post('/api/generate/image', async (req, res) => {
 
     console.log(`🎨 Fetching image server-side for: "${prompt.trim()}"`);
 
-    // Fetch image on server side with 45s timeout
+    // Fetch image on server side with 90s timeout
     const imageBuffer = await new Promise((resolve, reject) => {
       const request = https.get(pollinationsUrl, (imgRes) => {
         if (imgRes.statusCode !== 200) {
@@ -354,7 +354,7 @@ app.post('/api/generate/image', async (req, res) => {
         imgRes.on('error', reject);
       });
       request.on('error', reject);
-      request.setTimeout(45000, () => { request.destroy(); reject(new Error('Timeout')); });
+      request.setTimeout(90000, () => { request.destroy(); reject(new Error('Image generation timed out. Please try again.')); });
     });
 
     // Save to temp file with unique ID
