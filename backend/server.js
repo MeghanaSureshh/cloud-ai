@@ -47,14 +47,20 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 app.use(cors({
   origin: [
     'http://localhost:3000',
+    'http://localhost:3001',
     'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001',
     'https://cloud-ai-xi.vercel.app',
     'https://cloud-ai-git-main-c-s-meghanas-projects.vercel.app',
+    'https://cloud-ai-kkgi.onrender.com',
     /\.vercel\.app$/,
+    /\.onrender\.com$/,
   ],
-  methods: ['GET', 'POST', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type'],
+  methods: ['GET', 'POST', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
 }));
+app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 
 const upload = multer({
@@ -322,24 +328,13 @@ app.post('/api/generate/image', async (req, res) => {
   if (!prompt?.trim()) return res.status(400).json({ error: 'Image prompt is required.' });
 
   try {
-    // Enhance prompt with Groq
-    const enhanceCompletion = await groq.chat.completions.create({
-      messages: [
-        { role: 'system', content: 'Write a vivid image generation prompt under 60 words based on the user idea. Return only the prompt, no quotes, no explanation.' },
-        { role: 'user', content: prompt.trim() },
-      ],
-      model: 'llama-3.1-8b-instant',
-      temperature: 0.8,
-      max_tokens: 100,
-    });
-
-    const enhancedPrompt = (enhanceCompletion.choices[0]?.message?.content?.trim() || prompt.trim())
-      .replace(/^["'`]+|["'`]+$/g, '').trim();
+    // Use the user's prompt directly without enhancement to preserve their exact intent
+    const finalPrompt = prompt.trim();
 
     const seed = Math.floor(Math.random() * 999999);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=768&height=768&seed=${seed}&nologo=true&model=turbo`;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=768&height=768&seed=${seed}&nologo=true&model=turbo`;
 
-    console.log(`🎨 Fetching image server-side for: "${prompt.trim()}"`);
+    console.log(`🎨 Fetching image server-side for: "${finalPrompt}"`);
 
     // Fetch image on server side with 90s timeout
     const imageBuffer = await new Promise((resolve, reject) => {
@@ -362,8 +357,8 @@ app.post('/api/generate/image', async (req, res) => {
     const imagePath = path.join(TMP_DIR, `img_${imageId}.jpg`);
     fs.writeFileSync(imagePath, imageBuffer.buffer);
 
-    // Store metadata
-    imageCache[imageId] = { path: imagePath, prompt: enhancedPrompt, createdAt: Date.now() };
+    // Store metadata with original prompt (not enhanced)
+    imageCache[imageId] = { path: imagePath, prompt: finalPrompt, createdAt: Date.now() };
 
     // Clean up old images (keep last 20)
     const keys = Object.keys(imageCache);
@@ -380,8 +375,8 @@ app.post('/api/generate/image', async (req, res) => {
     console.log(`✅ Image saved: ${imageId} (${imageBuffer.buffer.length} bytes)`);
     res.json({
       imageUrl: `http://localhost:5000/api/image/${imageId}`,
-      originalPrompt: prompt.trim(),
-      enhancedPrompt,
+      originalPrompt: finalPrompt,
+      enhancedPrompt: finalPrompt,
     });
   } catch (error) {
     console.error('❌ Image gen error:', error.message);
