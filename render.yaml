@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: cloud-ai-backend
+    env: node
+    region: oregon
+    branch: main
+    root: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+  - type: static_site
+    name: cloud-ai-frontend
+    env: static
+    region: oregon
+    branch: main
+    root: claude-ai-chat
+    buildCommand: npm install && CI=false npm run build
+    publishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://cloud-ai-backend.onrender.com
